@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Nanopublication output contract",
+  "type": "object",
+  "required": ["case_id", "nanopublications", "boundary", "run_status"],
+  "properties": {
+    "case_id": {"type": "string", "description": "案例标识，来自 /input/case.json"},
+    "run_status": {"type": "string", "enum": ["success", "partial", "unable"]},
+    "nanopublications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "assertion", "evidence", "provenance", "status"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^np-[0-9]{3,}$"},
+          "assertion": {
+            "type": "object",
+            "required": ["subject", "predicate", "object"],
+            "properties": {
+              "subject": {"type": "string", "description": "具体主体，禁止代词"},
+              "predicate": {"type": "string", "description": "受控词表关系，见 relation-types.md"},
+              "object": {"type": "string", "description": "宾语/断言内容"},
+              "conditions": {"type": "array", "items": {"type": "string"}, "description": "范围、样本、剂量、时间等限定"},
+              "quantifiers": {"type": "array", "items": {"type": "string"}, "description": "量词与统计量"},
+              "polarity": {"type": "string", "enum": ["positive", "negative", "neutral"]}
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "required": ["excerpt", "location", "support"],
+            "properties": {
+              "excerpt": {"type": "string", "minLength": 12, "maxLength": 80, "description": "逐字摘录"},
+              "location": {
+                "type": "object",
+                "required": ["section", "paragraph", "page"],
+                "properties": {
+                  "section": {"type": "string"},
+                  "paragraph": {"type": "string"},
+                  "page": {"type": "string"},
+                  "table": {"type": ["string", "null"]},
+                  "figure": {"type": ["string", "null"]},
+                  "formula": {"type": ["string", "null"]}
+                }
+              },
+              "support": {"type": "string", "enum": ["direct", "indirect"]},
+              "inference": {"type": ["string", "null"], "description": "indirect 时的推理链"}
+            }
+          },
+          "provenance": {
+            "type": "object",
+            "required": ["paper_title", "authors", "year", "source_file"],
+            "properties": {
+              "paper_title": {"type": "string"},
+              "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+              "year": {"type": "string"},
+              "doi": {"type": ["string", "null"]},
+              "version": {"type": ["string", "null"]},
+              "source_file": {"type": "string"},
+              "retrieved_at": {"type": "string"}
+            }
+          },
+          "status": {"type": "string", "enum": ["reported", "inferred", "unverified", "not_reported", "conflicting"]},
+          "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "properties": {
+        "not_reported": {"type": "array", "items": {"type": "string"}},
+        "unverified": {"type": "array", "items": {"type": "string"}},
+        "conflicting": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}
